@@ -159,7 +159,7 @@ function AdminDashboard() {
               placeholder="Admin-nyckel"
               value={adminKey}
               onChange={(e) => setAdminKey(e.target.value)}
-              onKeyPress={(e) => e.key === 'Enter' && authenticate()}
+              onKeyDown={(e) => e.key === 'Enter' && authenticate()}
             />
             <button onClick={authenticate}>Logga in</button>
           </div>
