@@ -96,7 +96,7 @@ function JsonImporter() {
         throw new Error(errorData.error || 'Failed to import quiz');
       }
 
-      const result = await response.json();
+      await response.json(); // Response handled but not used
       alert(`Quiz "${previewQuiz.title}" importerat framgångsrikt!`);
       navigate('/admin');
     } catch (err) {

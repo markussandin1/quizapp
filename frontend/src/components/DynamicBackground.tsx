@@ -21,6 +21,7 @@ function DynamicBackground({ children }: DynamicBackgroundProps) {
       const cleanup = setupImageTransition();
       return cleanup;
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [images]);
 
   useEffect(() => {
@@ -28,6 +29,7 @@ function DynamicBackground({ children }: DynamicBackgroundProps) {
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchAllImages = async () => {
