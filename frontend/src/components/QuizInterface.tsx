@@ -24,11 +24,8 @@ function QuizInterface() {
   const fetchQuiz = async (quizId: number) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/quiz/${quizId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch quiz');
-      }
-      const quiz = await response.json();
+      const { getQuiz } = await import('../lib/supabase');
+      const quiz = await getQuiz(quizId);
       dispatch({ type: 'SET_QUIZ', payload: quiz });
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: error instanceof Error ? error.message : 'Unknown error' });

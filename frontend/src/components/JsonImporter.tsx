@@ -83,20 +83,8 @@ function JsonImporter() {
     setError(null);
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/quiz/create`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(previewQuiz)
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to import quiz');
-      }
-
-      await response.json(); // Response handled but not used
+      const { createQuiz } = await import('../lib/supabase');
+      await createQuiz(previewQuiz);
       alert(`Quiz "${previewQuiz.title}" importerat framgångsrikt!`);
       navigate('/admin');
     } catch (err) {

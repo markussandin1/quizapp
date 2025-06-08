@@ -32,11 +32,8 @@ function DynamicBackground({ children }: DynamicBackgroundProps) {
 
   const fetchAllImages = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/quiz/images/all`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch images');
-      }
-      const imageUrls = await response.json();
+      const { getAllImages } = await import('../lib/supabase');
+      const imageUrls = await getAllImages();
       setImages(imageUrls);
     } catch (error) {
       console.error('Error fetching images:', error);
