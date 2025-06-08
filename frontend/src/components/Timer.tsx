@@ -9,25 +9,33 @@ interface TimerProps {
 
 function Timer({ timeLimit, onTimeUp, isActive }: TimerProps) {
   const [timeLeft, setTimeLeft] = useState(timeLimit);
+  const [hasCalledTimeUp, setHasCalledTimeUp] = useState(false);
 
   useEffect(() => {
     setTimeLeft(timeLimit);
+    setHasCalledTimeUp(false); // Reset when new question starts
   }, [timeLimit]);
 
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive || hasCalledTimeUp) return;
 
     if (timeLeft <= 0) {
+      setHasCalledTimeUp(true); // Prevent multiple calls
       onTimeUp();
       return;
     }
 
     const interval = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
 
     return () => clearInterval(interval);
-  }, [timeLeft, isActive, onTimeUp]);
+  }, [timeLeft, isActive, onTimeUp, hasCalledTimeUp]);
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);

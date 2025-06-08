@@ -61,4 +61,14 @@ router.get('/', async (req: Request, res: Response) => {
   }
 });
 
+router.get('/images/all', async (req: Request, res: Response) => {
+  try {
+    const images = await quizService.getAllImages();
+    res.json(images);
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    res.status(500).json({ error: errorMessage });
+  }
+});
+
 export default router;

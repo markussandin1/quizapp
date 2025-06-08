@@ -12,6 +12,7 @@ function QuizInterface() {
   const [selectedAnswer, setSelectedAnswer] = useState<string>('');
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -37,8 +38,9 @@ function QuizInterface() {
   };
 
   const handleAnswerSelect = (answer: string) => {
-    if (showFeedback) return; // Prevent clicking during feedback
+    if (showFeedback || isProcessing) return; // Prevent clicking during feedback or processing
     
+    setIsProcessing(true);
     setSelectedAnswer(answer);
     
     // Immediately submit the answer
@@ -59,6 +61,7 @@ function QuizInterface() {
     setTimeout(() => {
       setShowFeedback(false);
       setSelectedAnswer('');
+      setIsProcessing(false);
       
       if (state.currentQuestionIndex < state.currentQuiz!.questions.length - 1) {
         dispatch({ type: 'NEXT_QUESTION' });
@@ -70,15 +73,28 @@ function QuizInterface() {
   };
 
   const handleTimeUp = () => {
-    if (showFeedback) return; // If already answered, don't do anything
+    if (showFeedback || isProcessing) return; // If already answered or processing, don't do anything
+    
+    setIsProcessing(true);
     
     // Auto-submit with no answer when time runs out
     setShowFeedback(true);
     setIsCorrect(false);
+    setSelectedAnswer(''); // No answer selected
+
+    const currentQuestion = state.currentQuiz!.questions[state.currentQuestionIndex];
+    dispatch({
+      type: 'SET_ANSWER',
+      payload: {
+        questionId: currentQuestion.id,
+        answer: '', // Empty answer for timeout
+      },
+    });
 
     setTimeout(() => {
       setShowFeedback(false);
       setSelectedAnswer('');
+      setIsProcessing(false);
       
       if (state.currentQuestionIndex < state.currentQuiz!.questions.length - 1) {
         dispatch({ type: 'NEXT_QUESTION' });
@@ -132,24 +148,19 @@ function QuizInterface() {
   return (
     <div className="quiz-container">
       <header className="quiz-header">
+        <span className="question-counter">
+          Fråga {state.currentQuestionIndex + 1} av {state.currentQuiz.questions.length}
+        </span>
         <h1>{state.currentQuiz.title}</h1>
+        <Timer
+          timeLimit={currentQuestion.time_limit}
+          onTimeUp={handleTimeUp}
+          isActive={!showFeedback && !isProcessing}
+        />
         <ProgressBar progress={progress} />
-        <div className="header-bottom">
-          <div className="question-counter">
-            Fråga {state.currentQuestionIndex + 1} av {state.currentQuiz.questions.length}
-          </div>
-          <div className="timer-section">
-            <Timer
-              timeLimit={currentQuestion.time_limit}
-              onTimeUp={handleTimeUp}
-              isActive={!showFeedback}
-            />
-          </div>
-        </div>
       </header>
 
       <main className="question-area">
-
         <div className="question-card">
           {currentQuestion.image_url && (
             <div className="question-image">
@@ -169,7 +180,7 @@ function QuizInterface() {
                     showFeedback && selectedAnswer === option && option !== currentQuestion.correct_answer ? 'wrong-answer' : ''
                   }`}
                   onClick={() => handleAnswerSelect(option)}
-                  disabled={showFeedback}
+                  disabled={showFeedback || isProcessing}
                 >
                   {String.fromCharCode(65 + index)}. {option}
                 </button>
@@ -186,7 +197,7 @@ function QuizInterface() {
                   showFeedback && selectedAnswer === 'true' && currentQuestion.correct_answer !== 'true' ? 'wrong-answer' : ''
                 }`}
                 onClick={() => handleAnswerSelect('true')}
-                disabled={showFeedback}
+                disabled={showFeedback || isProcessing}
               >
                 Sant
               </button>
@@ -197,7 +208,7 @@ function QuizInterface() {
                   showFeedback && selectedAnswer === 'false' && currentQuestion.correct_answer !== 'false' ? 'wrong-answer' : ''
                 }`}
                 onClick={() => handleAnswerSelect('false')}
-                disabled={showFeedback}
+                disabled={showFeedback || isProcessing}
               >
                 Falskt
               </button>

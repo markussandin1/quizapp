@@ -360,4 +360,46 @@ export class QuizService {
       });
     });
   }
+
+  async getAllImages(): Promise<string[]> {
+    const db = this.dbService.getDatabase();
+    
+    return new Promise((resolve, reject) => {
+      const images: string[] = [];
+      
+      // Get quiz cover images
+      db.all('SELECT image_url FROM quizzes WHERE image_url IS NOT NULL AND image_url != ""', [], (err, quizImages) => {
+        if (err) {
+          reject(err);
+          return;
+        }
+        
+        // Add quiz cover images
+        quizImages.forEach((row: any) => {
+          if (row.image_url) {
+            images.push(row.image_url);
+          }
+        });
+        
+        // Get question images
+        db.all('SELECT image_url FROM questions WHERE image_url IS NOT NULL AND image_url != ""', [], (err, questionImages) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+          
+          // Add question images
+          questionImages.forEach((row: any) => {
+            if (row.image_url) {
+              images.push(row.image_url);
+            }
+          });
+          
+          // Remove duplicates and resolve
+          const uniqueImages = [...new Set(images)];
+          resolve(uniqueImages);
+        });
+      });
+    });
+  }
 }

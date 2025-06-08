@@ -1,0 +1,181 @@
+/* Dynamic Background Container */
+.dynamic-background {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+/* Hero Container for Ken Burns Effect */
+.hero-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -2;
+  transform: scale(1.1); /* Pre-scaled for Ken Burns zoom-out effect */
+}
+
+/* CNN-inspirerad raster-effekt över hela bakgrunden */
+.hero-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    radial-gradient(circle at 1px 1px, rgba(0,0,0,0.15) 1px, transparent 0);
+  background-size: 8px 8px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Individual Hero Images */
+.hero-image {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity 2s ease-in-out;
+}
+
+.hero-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.8) contrast(1.1) saturate(1.1);
+  transform: scale(1.05) translate(0, 0);
+}
+
+/* Active Image (currently visible) */
+.hero-image.active {
+  opacity: 1;
+  animation: kenBurnsContinuous 5.5s ease-out forwards;
+}
+
+/* Fading Out (current image leaving) */
+.hero-image.fading-out {
+  animation: kenBurnsContinuous 5.5s ease-out forwards, fadeOut 1.5s ease-in-out forwards;
+}
+
+/* Fading In (next image entering) */
+.hero-image.fading-in {
+  animation: kenBurnsContinuous 5.5s ease-out forwards, fadeIn 1.5s ease-in-out forwards;
+}
+
+/* Inactive Images */
+.hero-image.inactive {
+  opacity: 0;
+}
+
+/* Simple Ken Burns - Slow Zoom In One Direction */
+@keyframes kenBurnsContinuous {
+  0% {
+    transform: scale(1.05) translate(0, 0);
+  }
+  100% {
+    transform: scale(1.15) translate(-1%, -0.5%);
+  }
+}
+
+/* Simple Fade Animations */
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Elegant Gradient Overlay */
+.background-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(
+    180deg,
+    rgba(248, 249, 250, 0.1) 0%,
+    rgba(248, 249, 250, 0.3) 20%,
+    rgba(248, 249, 250, 0.6) 50%,
+    rgba(248, 249, 250, 0.8) 80%,
+    rgba(248, 249, 250, 0.9) 100%
+  );
+  z-index: -1;
+  backdrop-filter: blur(0.5px);
+}
+
+/* Content Container */
+.background-content {
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  background: transparent;
+}
+
+/* Performance Optimizations */
+.hero-image {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+  will-change: transform, opacity;
+}
+
+/* Subtle Interaction Effects */
+.hero-image:hover img {
+  filter: brightness(0.85) contrast(1.15) saturate(1.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .hero-container {
+    transform: scale(1.2); /* Larger scale on mobile for better crop */
+  }
+  
+  .background-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(248, 249, 250, 0.2) 0%,
+      rgba(248, 249, 250, 0.4) 20%,
+      rgba(248, 249, 250, 0.7) 50%,
+      rgba(248, 249, 250, 0.85) 80%,
+      rgba(248, 249, 250, 0.95) 100%
+    );
+  }
+}
+
+@media (max-width: 480px) {
+  .background-overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(248, 249, 250, 0.3) 0%,
+      rgba(248, 249, 250, 0.5) 20%,
+      rgba(248, 249, 250, 0.75) 50%,
+      rgba(248, 249, 250, 0.9) 80%,
+      rgba(248, 249, 250, 0.95) 100%
+    );
+  }
+}
+
+/* Accessibility - Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero-image.active {
+    animation: none;
+  }
+  
+  .hero-image {
+    transition: opacity 1s ease;
+  }
+  
+  @keyframes kenBurns {
+    0%, 100% {
+      transform: scale(1.05);
+    }
+  }
+}

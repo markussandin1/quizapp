@@ -1,13 +1,13 @@
 .timer-container {
   display: flex;
   justify-content: center;
-  margin-bottom: 20px;
 }
+
 
 .timer-circle {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 80px;
+  height: 80px;
 }
 
 .timer-svg {
@@ -30,7 +30,7 @@
 }
 
 .timer-time {
-  font-size: 1.3rem;
+  font-size: 1.1rem;
   font-weight: bold;
   margin-bottom: 2px;
 }
@@ -42,15 +42,15 @@
 
 @media (max-width: 768px) {
   .timer-circle {
-    width: 100px;
-    height: 100px;
+    width: 70px;
+    height: 70px;
   }
   
   .timer-time {
-    font-size: 1.3rem;
+    font-size: 1rem;
   }
   
   .timer-label {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 }
