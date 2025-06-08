@@ -24,7 +24,7 @@ function QuizInterface() {
   const fetchQuiz = async (quizId: number) => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      const response = await fetch(`http://localhost:3001/api/quiz/${quizId}`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/quiz/${quizId}`);
       if (!response.ok) {
         throw new Error('Failed to fetch quiz');
       }

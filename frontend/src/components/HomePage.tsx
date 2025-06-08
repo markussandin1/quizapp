@@ -23,7 +23,7 @@ function HomePage() {
 
   const fetchQuizzes = async () => {
     try {
-      const response = await fetch('http://localhost:3001/api/quiz');
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/quiz`);
       if (!response.ok) {
         throw new Error('Failed to fetch quizzes');
       }
