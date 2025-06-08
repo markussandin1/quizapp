@@ -84,17 +84,8 @@ function AdminDashboard() {
 
   const fetchQuizzes = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/admin/quizzes`, {
-        headers: {
-          'admin-key': 'quiz-admin-2024'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch quizzes');
-      }
-      
-      const data = await response.json();
+      const { getQuizzes } = await import('../lib/supabase');
+      const data = await getQuizzes();
       setQuizzes(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -109,17 +100,9 @@ function AdminDashboard() {
     }
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/admin/quiz/${quizId}`, {
-        method: 'DELETE',
-        headers: {
-          'admin-key': 'quiz-admin-2024'
-        }
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to delete quiz');
-      }
-
+      const { deleteQuiz } = await import('../lib/supabase');
+      await deleteQuiz(quizId);
+      
       // Remove from local state
       setQuizzes(quizzes.filter(quiz => quiz.id !== quizId));
       alert('Quiz borttaget!');
