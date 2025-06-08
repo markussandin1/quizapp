@@ -1,5 +1,13 @@
 // Vercel Function: /api/quiz/images/all.js
 export default async function handler(req, res) {
+  // Add CORS headers
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, admin-key');
+
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
   // Mock bilder
   const mockImages = [
     "https://via.placeholder.com/800x600/FF6B6B/FFFFFF?text=Quiz+Image+1",
