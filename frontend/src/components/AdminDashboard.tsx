@@ -169,6 +169,7 @@ function AdminDashboard() {
       <div className="admin-login">
         <div className="login-card">
           <h1>🔑 Admin-inloggning</h1>
+          <h2>lösen: quiz-admin-2024</h2>
           <div className="login-form">
             <input
               type="password"

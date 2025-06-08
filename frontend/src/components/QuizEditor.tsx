@@ -60,23 +60,8 @@ function QuizEditor() {
 
   const fetchQuiz = async (quizId: number) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/admin/quizzes`, {
-        headers: {
-          'admin-key': 'quiz-admin-2024'
-        }
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch quiz');
-      }
-      
-      const quizzes = await response.json();
-      const foundQuiz = quizzes.find((q: Quiz) => q.id === quizId);
-      
-      if (!foundQuiz) {
-        throw new Error('Quiz not found');
-      }
-      
+      const { getQuiz } = await import('../lib/supabase');
+      const foundQuiz = await getQuiz(quizId);
       setQuiz(foundQuiz);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Unknown error');
@@ -140,23 +125,13 @@ function QuizEditor() {
 
     setSaving(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/admin/quiz/${quiz.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'admin-key': 'quiz-admin-2024'
-        },
-        body: JSON.stringify({
-          title: quiz.title,
-          description: quiz.description,
-          image_url: quiz.image_url,
-          questions: quiz.questions
-        })
+      const { updateQuiz } = await import('../lib/supabase');
+      await updateQuiz(quiz.id, {
+        title: quiz.title,
+        description: quiz.description,
+        image_url: quiz.image_url,
+        questions: quiz.questions
       });
-
-      if (!response.ok) {
-        throw new Error('Failed to save quiz');
-      }
 
       alert('Quiz sparat!');
       navigate('/admin');
