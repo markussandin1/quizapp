@@ -8,13 +8,35 @@ export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Quiz API functions
 export async function getQuizzes() {
-  const { data, error } = await supabase
-    .from('quizzes')
-    .select('*')
-    .order('created_at', { ascending: false });
-  
-  if (error) throw error;
-  return data;
+  try {
+    const { data: quizzes, error } = await supabase
+      .from('quizzes')
+      .select('*')
+      .order('created_at', { ascending: false });
+    
+    if (error) {
+      console.error('Supabase error:', error);
+      throw error;
+    }
+    
+    // Get questions for each quiz
+    if (quizzes) {
+      for (const quiz of quizzes) {
+        const { data: questions } = await supabase
+          .from('questions')
+          .select('*')
+          .eq('quiz_id', quiz.id)
+          .order('id');
+        
+        quiz.questions = questions || [];
+      }
+    }
+    
+    return quizzes || [];
+  } catch (err) {
+    console.error('getQuizzes error:', err);
+    throw err;
+  }
 }
 
 export async function getQuiz(id: number) {

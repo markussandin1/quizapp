@@ -83,12 +83,20 @@ function AdminDashboard() {
   };
 
   const fetchQuizzes = async () => {
+    console.log('fetchQuizzes called');
     try {
-      const { getQuizzes } = await import('../lib/supabase');
-      const data = await getQuizzes();
-      setQuizzes(data);
+      console.log('Importing supabase...');
+      const supabaseModule = await import('../lib/supabase');
+      console.log('Supabase module:', supabaseModule);
+      
+      const data = await supabaseModule.getQuizzes();
+      console.log('Quiz data:', data);
+      
+      setQuizzes(Array.isArray(data) ? data : []); // Ensure we always have an array
     } catch (err) {
+      console.error('Error fetching quizzes:', err);
       setError(err instanceof Error ? err.message : 'Unknown error');
+      setQuizzes([]); // Set empty array on error
     } finally {
       setLoading(false);
     }
@@ -205,7 +213,7 @@ function AdminDashboard() {
 
         <div className="quiz-list">
           <div className="quiz-list-header">
-            <h2>Alla Quiz ({quizzes.length})</h2>
+            <h2>Alla Quiz ({quizzes?.length || 0})</h2>
             <button 
               onClick={() => navigate('/admin/import')}
               className="import-button"
@@ -214,7 +222,7 @@ function AdminDashboard() {
             </button>
           </div>
           
-          {quizzes.length === 0 ? (
+          {!quizzes || quizzes.length === 0 ? (
             <div className="no-quizzes">
               <p>Inga quiz hittades.</p>
             </div>
@@ -227,7 +235,7 @@ function AdminDashboard() {
                     {quiz.description && <p className="description">{quiz.description}</p>}
                     <div className="quiz-stats">
                       <span className="question-count">
-                        📊 {quiz.questions.length} frågor
+                        📊 {quiz.questions?.length || 0} frågor
                       </span>
                       <span className="created-date">
                         📅 {new Date(quiz.created_at).toLocaleDateString('sv-SE')}
