@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './DynamicBackground.css';
 
 interface DynamicBackgroundProps {
@@ -21,16 +21,14 @@ function DynamicBackground({ children }: DynamicBackgroundProps) {
       const cleanup = setupImageTransition();
       return cleanup;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [images]);
+  }, [images]); // setupImageTransition is stable
 
   useEffect(() => {
     setupParallax();
     return () => {
       window.removeEventListener('scroll', handleScroll);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, []); // setupParallax and handleScroll are stable
 
   const fetchAllImages = async () => {
     try {
