@@ -1,0 +1,58 @@
+{
+  "title": "Nutidsorientering – Örnsköldsvik vecka 22",
+  "description": "Testa vad du vet om vad som hänt i Örnsköldsvik den senaste veckan!",
+  "questions": [
+    {
+      "question_text": "I vilken stadsdel inträffade branden där en byggnad totalförstördes under veckan?",
+      "question_type": "multiple_choice",
+      "options": ["Centrum", "Domsjö", "Hörnett", "Själevad"],
+      "correct_answer": "Domsjö",
+      "time_limit": 30,
+      "points": 1
+    },
+    {
+      "question_text": "Vilket fordon var inblandat i olyckan där två pojkar blev allvarligt skadade?",
+      "question_type": "multiple_choice",
+      "options": ["Cykel", "Fyrhjuling", "Moped", "Bil"],
+      "correct_answer": "Fyrhjuling",
+      "time_limit": 30,
+      "points": 1
+    },
+    {
+      "question_text": "Vilket djur drabbades av ett smittsamt virus i Ö-vik enligt en artikel under veckan?",
+      "question_type": "multiple_choice",
+      "options": ["Hund", "Katt", "Kanin", "Häst"],
+      "correct_answer": "Katt",
+      "time_limit": 30,
+      "points": 1
+    },
+    {
+      "question_text": "Vad handlade artikeln 'Det luktar så mycket svett' om?",
+      "question_type": "multiple_choice",
+      "options": [
+        "Att ventilationen i en skola var trasig",
+        "Att eleverna hade idrottsdag",
+        "Att det var varmt i klassrummet",
+        "Att många elever glömde duscha efter idrotten"
+      ],
+      "correct_answer": "Att många elever glömde duscha efter idrotten",
+      "time_limit": 30,
+      "points": 1
+    },
+    {
+      "question_text": "Vad säljer Adam till invånarna i Ö-vik enligt en artikel under veckan?",
+      "question_type": "multiple_choice",
+      "options": ["Glass", "Bröd", "Tidningar", "Blommor"],
+      "correct_answer": "Glass",
+      "time_limit": 30,
+      "points": 1
+    },
+    {
+      "question_text": "Det har varit flera bränder i Örnsköldsvik under veckan.",
+      "question_type": "true_false",
+      "correct_answer": "true",
+      "time_limit": 20,
+      "points": 1
+    }
+  ]
+}

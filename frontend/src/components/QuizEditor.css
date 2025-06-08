@@ -1,0 +1,349 @@
+.editor-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+}
+
+.editor-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  margin-bottom: 30px;
+}
+
+.editor-header h1 {
+  font-size: 2.5rem;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.back-button {
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  padding: 12px 20px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.back-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: translateY(-2px);
+}
+
+.save-button {
+  background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+  color: white;
+  border: none;
+  padding: 12px 25px;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.save-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+.save-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.editor-content {
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.quiz-metadata {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  margin-bottom: 25px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.field-group {
+  margin-bottom: 20px;
+}
+
+.field-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+.title-input, .description-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.title-input:focus, .description-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.title-input {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.questions-section {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.questions-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.questions-header h2 {
+  color: #333;
+  margin: 0;
+}
+
+.add-question-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: all 0.3s ease;
+}
+
+.add-question-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.questions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+}
+
+.no-questions {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 40px;
+  background: #f8f9fa;
+  border-radius: 10px;
+}
+
+.question-editor {
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  padding: 25px;
+  background: #fafbfc;
+  transition: border-color 0.3s ease;
+}
+
+.question-editor:hover {
+  border-color: #667eea;
+}
+
+.question-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.question-header h3 {
+  color: #333;
+  margin: 0;
+  font-size: 1.3rem;
+}
+
+.question-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.type-select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+
+.delete-question-button {
+  background: #f44336;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background 0.3s ease;
+}
+
+.delete-question-button:hover {
+  background: #d32f2f;
+}
+
+.question-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.question-text-input, .explanation-input {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 1rem;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.question-text-input:focus, .explanation-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.options-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.option-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.option-label {
+  font-weight: bold;
+  color: #666;
+  min-width: 25px;
+}
+
+.option-input {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.option-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.correct-answer-select {
+  width: 100%;
+  padding: 10px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: white;
+  transition: border-color 0.3s ease;
+}
+
+.correct-answer-select:focus {
+  outline: none;
+  border-color: #4CAF50;
+}
+
+.question-settings {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.time-input, .points-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.time-input:focus, .points-input:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.loading, .error {
+  background: white;
+  border-radius: 15px;
+  padding: 40px;
+  text-align: center;
+  font-size: 1.5rem;
+  color: #333;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+.error {
+  color: #e74c3c;
+}
+
+@media (max-width: 768px) {
+  .editor-header {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .editor-header h1 {
+    font-size: 2rem;
+  }
+  
+  .header-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .question-settings {
+    grid-template-columns: 1fr;
+  }
+  
+  .questions-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .question-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: stretch;
+  }
+}
