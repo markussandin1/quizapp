@@ -32,7 +32,7 @@ function DynamicBackground({ children }: DynamicBackgroundProps) {
 
   const fetchAllImages = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/quiz/images/all`);
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/quiz/images/all`);
       if (!response.ok) {
         throw new Error('Failed to fetch images');
       }

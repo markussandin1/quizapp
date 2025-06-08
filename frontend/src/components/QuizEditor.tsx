@@ -60,7 +60,7 @@ function QuizEditor() {
 
   const fetchQuiz = async (quizId: number) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/quizzes`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/admin/quizzes`, {
         headers: {
           'admin-key': 'quiz-admin-2024'
         }
@@ -140,7 +140,7 @@ function QuizEditor() {
 
     setSaving(true);
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/quiz/${quiz.id}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/admin/quiz/${quiz.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

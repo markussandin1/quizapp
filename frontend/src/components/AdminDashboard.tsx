@@ -84,7 +84,7 @@ function AdminDashboard() {
 
   const fetchQuizzes = async () => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/quizzes`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/admin/quizzes`, {
         headers: {
           'admin-key': 'quiz-admin-2024'
         }
@@ -109,7 +109,7 @@ function AdminDashboard() {
     }
 
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/admin/quiz/${quizId}`, {
+      const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/api/admin/quiz/${quizId}`, {
         method: 'DELETE',
         headers: {
           'admin-key': 'quiz-admin-2024'
