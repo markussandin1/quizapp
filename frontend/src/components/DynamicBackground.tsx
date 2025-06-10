@@ -24,10 +24,14 @@ function DynamicBackground({ children }: DynamicBackgroundProps) {
   }, [images]); // setupImageTransition is stable
 
   useEffect(() => {
-    setupParallax();
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
+    // Only enable parallax on desktop to avoid mobile performance issues
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    if (!isMobile) {
+      setupParallax();
+      return () => {
+        window.removeEventListener('scroll', handleScroll);
+      };
+    }
   }, []); // setupParallax and handleScroll are stable
 
   const fetchAllImages = async () => {
@@ -46,12 +50,12 @@ function DynamicBackground({ children }: DynamicBackgroundProps) {
     const interval = setInterval(() => {
       setIsTransitioning(true);
       
-      // Efter 1.5 sekunder (när crossfade är klar), byt till nästa bild
+      // Efter 2 sekunder (när crossfade är klar), byt till nästa bild
       setTimeout(() => {
         setCurrentImageIndex((prevCurrent) => (prevCurrent + 1) % images.length);
         setIsTransitioning(false);
-      }, 1500);
-    }, 7000); // Byt bild var 7:e sekund (5.5s visning + 1.5s övergång)
+      }, 2000);
+    }, 8000); // Byt bild var 8:e sekund (6s visning + 2s övergång)
 
     return () => clearInterval(interval);
   };
@@ -60,13 +64,17 @@ function DynamicBackground({ children }: DynamicBackgroundProps) {
     window.addEventListener('scroll', handleScroll, { passive: true });
   };
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (heroRef.current) {
       const scrolled = window.pageYOffset;
-      const parallax = scrolled * 0.5; // Mjuk parallax för hero-bilderna
-      heroRef.current.style.transform = `translate3d(0, ${parallax}px, 0) scale(1.1)`;
+      const parallax = scrolled * 0.3; // Reducerad parallax för smoothare känsla
+      requestAnimationFrame(() => {
+        if (heroRef.current) {
+          heroRef.current.style.transform = `translate3d(0, ${parallax}px, 0) scale(1.1)`;
+        }
+      });
     }
-  };
+  }, []);
 
   if (loading || images.length === 0) {
     return (

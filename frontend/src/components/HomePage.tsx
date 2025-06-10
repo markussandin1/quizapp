@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DynamicBackground from './DynamicBackground';
+import SessionModeToggle from './SessionModeToggle';
 import './HomePage.css';
 
 interface Quiz {
@@ -15,6 +16,7 @@ function HomePage() {
   const [quizzes, setQuizzes] = useState<Quiz[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sessionMode, setSessionMode] = useState<'individual' | 'classroom'>('individual');
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -73,6 +75,11 @@ function HomePage() {
             <p>Välj ett quiz att börja med!</p>
           </div>
         </header>
+
+        <SessionModeToggle 
+          currentMode={sessionMode} 
+          onModeChange={setSessionMode} 
+        />
 
         <main className="quiz-grid">
           {quizzes.length === 0 ? (

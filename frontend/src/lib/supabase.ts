@@ -162,3 +162,192 @@ export async function deleteQuiz(id: number) {
   
   if (error) throw error;
 }
+
+// ===============================
+// CLASSROOM MODE API FUNCTIONS
+// ===============================
+
+// Generera unik 6-siffrig sessionskod
+async function generateSessionCode(): Promise<string> {
+  let attempts = 0;
+  const maxAttempts = 10;
+  
+  while (attempts < maxAttempts) {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    
+    // Kontrollera om koden redan finns
+    const { data } = await supabase
+      .from('quiz_sessions')
+      .select('session_code')
+      .eq('session_code', code)
+      .eq('is_active', true);
+    
+    if (!data || data.length === 0) {
+      return code;
+    }
+    
+    attempts++;
+  }
+  
+  throw new Error('Could not generate unique session code');
+}
+
+// Skapa session
+export async function createQuizSession(quizId: number, teacherName: string) {
+  try {
+    const sessionCode = await generateSessionCode();
+    
+    const { data: session, error } = await supabase
+      .from('quiz_sessions')
+      .insert({
+        quiz_id: quizId,
+        session_code: sessionCode,
+        teacher_name: teacherName
+      })
+      .select()
+      .single();
+    
+    if (error) throw error;
+    
+    return {
+      sessionCode,
+      sessionId: session.id
+    };
+  } catch (err) {
+    console.error('Error creating session:', err);
+    throw err;
+  }
+}
+
+// Gå med i session
+export async function joinSession(sessionCode: string, participantName: string) {
+  try {
+    // Hitta aktiv session
+    const { data: session, error: sessionError } = await supabase
+      .from('quiz_sessions')
+      .select('*')
+      .eq('session_code', sessionCode)
+      .eq('is_active', true)
+      .single();
+    
+    if (sessionError || !session) {
+      throw new Error('Session not found or inactive');
+    }
+    
+    // Kontrollera om namnet redan finns (tillåt men lägg till nummer)
+    const { data: existingParticipants } = await supabase
+      .from('session_participants')
+      .select('participant_name')
+      .eq('session_id', session.id);
+    
+    let finalName = participantName;
+    if (existingParticipants) {
+      const sameNames = existingParticipants.filter(p => 
+        p.participant_name.startsWith(participantName)
+      );
+      if (sameNames.length > 0) {
+        finalName = `${participantName} (${sameNames.length + 1})`;
+      }
+    }
+    
+    // Lägg till deltagare
+    const { data: participant, error: participantError } = await supabase
+      .from('session_participants')
+      .insert({
+        session_id: session.id,
+        participant_name: finalName
+      })
+      .select()
+      .single();
+    
+    if (participantError) throw participantError;
+    
+    return session.id;
+  } catch (err) {
+    console.error('Error joining session:', err);
+    throw err;
+  }
+}
+
+// Hämta session-info
+export async function getSession(sessionCode: string) {
+  try {
+    const { data: session, error } = await supabase
+      .from('quiz_sessions')
+      .select(`
+        *,
+        quiz:quizzes(id, title, description, image_url)
+      `)
+      .eq('session_code', sessionCode)
+      .eq('is_active', true)
+      .single();
+    
+    if (error) throw error;
+    return session;
+  } catch (err) {
+    console.error('Error getting session:', err);
+    throw err;
+  }
+}
+
+// Hämta session by ID
+export async function getSessionById(sessionId: string) {
+  try {
+    const { data: session, error } = await supabase
+      .from('quiz_sessions')
+      .select(`
+        *,
+        quiz:quizzes(id, title, description, image_url)
+      `)
+      .eq('id', sessionId)
+      .single();
+    
+    if (error) throw error;
+    return session;
+  } catch (err) {
+    console.error('Error getting session by ID:', err);
+    throw err;
+  }
+}
+
+// Hämta deltagare
+export async function getSessionParticipants(sessionId: string) {
+  try {
+    const { data: participants, error } = await supabase
+      .from('session_participants')
+      .select('*')
+      .eq('session_id', sessionId)
+      .eq('is_connected', true)
+      .order('joined_at');
+    
+    if (error) throw error;
+    return participants || [];
+  } catch (err) {
+    console.error('Error getting participants:', err);
+    throw err;
+  }
+}
+
+// Uppdatera session-status
+export async function updateSessionStatus(sessionId: string, status: 'active' | 'started' | 'ended') {
+  try {
+    const updates: any = {};
+    
+    if (status === 'started') {
+      updates.started_at = new Date().toISOString();
+    } else if (status === 'ended') {
+      updates.ended_at = new Date().toISOString();
+      updates.is_active = false;
+    }
+    
+    const { error } = await supabase
+      .from('quiz_sessions')
+      .update(updates)
+      .eq('id', sessionId);
+    
+    if (error) throw error;
+  } catch (err) {
+    console.error('Error updating session status:', err);
+    throw err;
+  }
+}
