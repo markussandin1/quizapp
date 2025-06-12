@@ -59,8 +59,8 @@ function SessionWaitingRoom() {
       
       // Kontrollera om quizet har startat
       if (sessionData.started_at) {
-        // Navigera till quiz-spelning - använd quiz.id från joined data
-        navigate(`/quiz/${sessionData.quiz.id}`, {
+        // Navigera till den nya realtime quiz interface
+        navigate(`/quiz/${sessionData.quiz.id}/realtime`, {
           state: { 
             sessionMode: true, 
             sessionId: sessionData.id,

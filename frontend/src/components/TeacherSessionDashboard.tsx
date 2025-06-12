@@ -103,6 +103,37 @@ function TeacherSessionDashboard() {
     }
   };
 
+  const handleStartRealtimeQuiz = async () => {
+    if (!session || participants.length === 0) {
+      alert('Vänta tills minst en elev har gått med innan du startar.');
+      return;
+    }
+
+    if (!window.confirm(`Starta REALTIDS quizet för ${participants.length} deltagare? Alla elever kommer att se samma frågor samtidigt.`)) {
+      return;
+    }
+
+    setStartingQuiz(true);
+
+    try {
+      await updateSessionStatus(sessionId!, 'started');
+      
+      // Navigera till den nya realtime teacher controller MED autostart
+      navigate(`/session/${sessionId}/realtime/${session.quiz.id}`, {
+        state: { 
+          sessionId,
+          sessionCode: session.session_code,
+          autoStart: true  // Lägg till denna flagga
+        }
+      });
+    } catch (err) {
+      alert('Kunde inte starta realtids quizet');
+      console.error('Error starting realtime quiz:', err);
+    } finally {
+      setStartingQuiz(false);
+    }
+  };
+
   const handleEndSession = async () => {
     if (!window.confirm('Är du säker på att du vill avsluta sessionen? Detta kan inte ångras.')) {
       return;
@@ -257,13 +288,24 @@ function TeacherSessionDashboard() {
           <div className="action-buttons">
             {!isStarted && !isEnded && (
               <>
-                <button 
-                  onClick={handleStartQuiz}
-                  className="start-button"
-                  disabled={startingQuiz || participants.length === 0}
-                >
-                  {startingQuiz ? 'Startar...' : '🚀 Starta Quiz'}
-                </button>
+                <div className="quiz-mode-buttons">
+                  <button 
+                    onClick={handleStartQuiz}
+                    className="start-button traditional"
+                    disabled={startingQuiz || participants.length === 0}
+                    title="Traditionellt quiz där eleverna går genom frågorna i egen takt"
+                  >
+                    {startingQuiz ? 'Startar...' : '📝 Starta Traditionellt Quiz'}
+                  </button>
+                  <button 
+                    onClick={handleStartRealtimeQuiz}
+                    className="start-button realtime"
+                    disabled={startingQuiz || participants.length === 0}
+                    title="Realtids quiz där alla elever ser samma fråga samtidigt"
+                  >
+                    {startingQuiz ? 'Startar...' : '⚡ Starta Realtids Quiz'}
+                  </button>
+                </div>
                 <button 
                   onClick={handleEndSession}
                   className="end-button"

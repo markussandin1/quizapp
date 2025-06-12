@@ -1,10 +1,26 @@
 // @ts-ignore
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 'https://nghqzpsrvxnsrbllsrng.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5naHF6cHNydnhuc3JibGxzcm5nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDk0MTk4MTQsImV4cCI6MjA2NDk5NTgxNH0.rFGIFSXgrR21rFjRm_mTb0Yp3FvbeRsyUVIzo9JDjoI';
 
-export const supabase = createClient(supabaseUrl, supabaseKey);
+// Singleton pattern för Supabase client
+let supabaseInstance: SupabaseClient | null = null;
+
+function getSupabaseClient() {
+  if (!supabaseInstance) {
+    supabaseInstance = createClient(supabaseUrl, supabaseKey, {
+      realtime: {
+        params: {
+          eventsPerSecond: 10
+        }
+      }
+    });
+  }
+  return supabaseInstance;
+}
+
+export const supabase = getSupabaseClient();
 
 // Quiz API functions
 export async function getQuizzes() {
@@ -335,9 +351,11 @@ export async function updateSessionStatus(sessionId: string, status: 'active' | 
     
     if (status === 'started') {
       updates.started_at = new Date().toISOString();
+      updates.session_state = 'started';
     } else if (status === 'ended') {
       updates.ended_at = new Date().toISOString();
       updates.is_active = false;
+      updates.session_state = 'ended';
     }
     
     const { error } = await supabase
@@ -350,4 +368,244 @@ export async function updateSessionStatus(sessionId: string, status: 'active' | 
     console.error('Error updating session status:', err);
     throw err;
   }
+}
+
+// ===============================
+// SPRINT 2: REALTIME API FUNCTIONS
+// ===============================
+
+// Uppdatera session med aktuell fråga
+export async function updateSessionQuestion(sessionId: string, questionIndex: number) {
+  try {
+    const { error } = await supabase
+      .from('quiz_sessions')
+      .update({
+        current_question_index: questionIndex,
+        current_question_started_at: new Date().toISOString(),
+        session_state: 'active'
+      })
+      .eq('id', sessionId);
+    
+    if (error) throw error;
+    console.log(`Updated session ${sessionId} to question ${questionIndex}, state: active`);
+  } catch (err) {
+    console.error('Error updating session question:', err);
+    throw err;
+  }
+}
+
+// Avsluta quiz session
+export async function endQuizSession(sessionId: string) {
+  try {
+    const { error } = await supabase
+      .from('quiz_sessions')
+      .update({
+        session_state: 'ended',
+        ended_at: new Date().toISOString()
+      })
+      .eq('id', sessionId);
+    
+    if (error) throw error;
+    console.log(`Quiz session ${sessionId} ended`);
+  } catch (err) {
+    console.error('Error ending quiz session:', err);
+    throw err;
+  }
+}
+
+// Spara elevens svar
+export async function saveStudentAnswer(
+  sessionId: string, 
+  participantId: string, 
+  questionId: number, 
+  answer: string, 
+  timeTaken: number
+) {
+  try {
+    // För den enkla versionen, skapa en fake participant record om den inte finns
+    const { data: existingParticipant } = await supabase
+      .from('session_participants')
+      .select('id')
+      .eq('session_id', sessionId)
+      .eq('participant_name', participantId.split('_').pop())
+      .single();
+    
+    let finalParticipantId = participantId;
+    
+    if (!existingParticipant) {
+      // Skapa en temporary participant record
+      const { data: newParticipant, error: participantError } = await supabase
+        .from('session_participants')
+        .insert({
+          session_id: sessionId,
+          participant_name: participantId.split('_').pop() || 'Unknown'
+        })
+        .select('id')
+        .single();
+      
+      if (!participantError && newParticipant) {
+        finalParticipantId = newParticipant.id;
+      }
+    } else {
+      finalParticipantId = existingParticipant.id;
+    }
+
+    const { error } = await supabase
+      .from('session_answers')
+      .insert({
+        session_id: sessionId,
+        participant_id: finalParticipantId,
+        question_id: questionId,
+        answer,
+        time_taken: timeTaken
+      });
+    
+    if (error) throw error;
+  } catch (err) {
+    console.error('Error saving student answer:', err);
+    // Don't throw error to avoid disrupting student experience
+    console.log('Answer save failed, but continuing...');
+  }
+}
+
+// Hämta svar för aktuell fråga
+export async function getQuestionAnswers(sessionId: string, questionId: number) {
+  try {
+    const { data: answers, error } = await supabase
+      .from('session_answers')
+      .select(`
+        *,
+        participant:session_participants(participant_name)
+      `)
+      .eq('session_id', sessionId)
+      .eq('question_id', questionId)
+      .order('answered_at');
+    
+    if (error) throw error;
+    return answers || [];
+  } catch (err) {
+    console.error('Error getting question answers:', err);
+    throw err;
+  }
+}
+
+// Hämta alla session-svar för resultat
+export async function getSessionResults(sessionId: string) {
+  try {
+    const { data: answers, error } = await supabase
+      .from('session_answers')
+      .select(`
+        *,
+        participant:session_participants(participant_name),
+        question:questions(question_text, correct_answer, points)
+      `)
+      .eq('session_id', sessionId)
+      .order('answered_at');
+    
+    if (error) throw error;
+    return answers || [];
+  } catch (err) {
+    console.error('Error getting session results:', err);
+    throw err;
+  }
+}
+
+// Global channel tracking to prevent duplicate subscriptions
+const activeChannels = new Map<string, any>();
+
+// Helper function to safely remove channel
+function removeChannel(channelId: string) {
+  if (activeChannels.has(channelId)) {
+    const channel = activeChannels.get(channelId);
+    try {
+      if (channel && typeof channel.unsubscribe === 'function') {
+        channel.unsubscribe();
+      }
+    } catch (error) {
+      console.log('Error removing channel:', error);
+    }
+    activeChannels.delete(channelId);
+  }
+}
+
+// Realtime subscription för session-uppdateringar
+export function subscribeToSession(sessionId: string, callback: (payload: any) => void) {
+  const channelId = `session_${sessionId}`;
+  
+  // Remove existing channel if it exists
+  removeChannel(channelId);
+  
+  const channel = supabase
+    .channel(channelId)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'quiz_sessions',
+        filter: `id=eq.${sessionId}`
+      },
+      callback
+    )
+    .subscribe();
+    
+  activeChannels.set(channelId, channel);
+  return channel;
+}
+
+// Realtime subscription för participant-uppdateringar
+export function subscribeToParticipants(sessionId: string, callback: (payload: any) => void) {
+  const channelId = `participants_${sessionId}`;
+  
+  // Remove existing channel if it exists
+  removeChannel(channelId);
+  
+  const channel = supabase
+    .channel(channelId)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'session_participants',
+        filter: `session_id=eq.${sessionId}`
+      },
+      callback
+    )
+    .subscribe();
+    
+  activeChannels.set(channelId, channel);
+  return channel;
+}
+
+// Realtime subscription för svar-uppdateringar
+export function subscribeToAnswers(sessionId: string, callback: (payload: any) => void) {
+  const channelId = `answers_${sessionId}`;
+  
+  // Remove existing channel if it exists
+  removeChannel(channelId);
+  
+  const channel = supabase
+    .channel(channelId)
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'session_answers',
+        filter: `session_id=eq.${sessionId}`
+      },
+      callback
+    )
+    .subscribe();
+    
+  activeChannels.set(channelId, channel);
+  return channel;
+}
+
+// Function to cleanup all channels for a session
+export function cleanupSessionChannels(sessionId: string) {
+  removeChannel(`session_${sessionId}`);
+  removeChannel(`participants_${sessionId}`);
+  removeChannel(`answers_${sessionId}`);
 }

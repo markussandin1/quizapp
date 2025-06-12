@@ -123,6 +123,43 @@ function AdminDashboard() {
     navigate(`/admin/edit/${quizId}`);
   };
 
+  const createNewQuiz = async () => {
+    try {
+      console.log('Creating new empty quiz...');
+      const supabaseModule = await import('../lib/supabase');
+      
+      // Skapa ett tomt quiz med en standardfråga
+      const newQuizData = {
+        title: 'Nytt Quiz',
+        description: 'Beskriv ditt quiz här...',
+        image_url: null,
+        questions: [
+          {
+            question_text: 'Din första fråga här...',
+            question_type: 'multiple_choice' as const,
+            options: ['Alternativ A', 'Alternativ B', 'Alternativ C', 'Alternativ D'],
+            correct_answer: 'Alternativ A',
+            explanation: 'Förklaring till det rätta svaret...',
+            image_url: null,
+            article_url: null,
+            time_limit: 30,
+            points: 1
+          }
+        ]
+      };
+      
+      const createdQuiz = await supabaseModule.createQuiz(newQuizData);
+      console.log('New quiz created:', createdQuiz);
+      
+      // Navigera direkt till editorn för det nya quizet
+      navigate(`/admin/edit/${createdQuiz.id}`);
+      
+    } catch (err) {
+      console.error('Error creating new quiz:', err);
+      setError('Kunde inte skapa nytt quiz');
+    }
+  };
+
   const exportQuizAsJson = (quiz: Quiz) => {
     // Skapa JSON-struktur för export
     const exportData = {
@@ -214,12 +251,20 @@ function AdminDashboard() {
         <div className="quiz-list">
           <div className="quiz-list-header">
             <h2>Alla Quiz ({quizzes?.length || 0})</h2>
-            <button 
-              onClick={() => navigate('/admin/import')}
-              className="import-button"
-            >
-              📋 Importera Quiz från JSON
-            </button>
+            <div className="header-buttons">
+              <button 
+                onClick={createNewQuiz}
+                className="create-button"
+              >
+                ✨ Skapa Nytt Quiz
+              </button>
+              <button 
+                onClick={() => navigate('/admin/import')}
+                className="import-button"
+              >
+                📋 Importera Quiz från JSON
+              </button>
+            </div>
           </div>
           
           {!quizzes || quizzes.length === 0 ? (
